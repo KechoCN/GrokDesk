@@ -10,6 +10,7 @@ module.exports = async function afterPack({ appOutDir, electronPlatformName, pac
     : path.join(appOutDir, 'resources');
   const archive = path.join(resources, 'app.asar');
   const entries = new Set(listPackage(archive).map(file => file.replaceAll('\\', '/').replace(/^\//, '')));
+  assert.ok(entries.has('renderer-dist/THIRD-PARTY-LICENSES.md'), 'Bundled renderer dependency licenses must be included in app.asar.');
   for (const name of Object.keys(packager.info.metadata.dependencies || {})) {
     assert.ok(entries.has(`node_modules/${name}/package.json`), `Production dependency omitted from app.asar: ${name}`);
   }

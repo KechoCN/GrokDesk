@@ -1,6 +1,7 @@
 // Presentation adapted from ZCode WorkspaceSidebar/NewTaskButtonGroup/TaskListItem,
 // Apache-2.0, 872ad960de7ec172591f7e1952f7849229f94521. ZCode services replaced by GrokDesk IPC.
 import { useEffect, useRef, useState } from 'react';
+import grokIcon from '../Assets/grok-mobile.png';
 import { Archive, ChevronDown, ChevronRight, Ellipsis, Folder, MessageCirclePlus, PanelLeftClose, Pin, Plus, Search, Settings, UserRound } from 'lucide-react';
 import type { AppSnapshot, Conversation, Workspace } from '../shared/api';
 import { Button } from './components/ui/button';
@@ -83,7 +84,7 @@ export function Sidebar({ state, run, onSelect, onNew, onSettings, onEdit, onCol
 
   return <aside className="sidebar flex h-full min-h-0 flex-col overflow-hidden bg-sidebar text-foreground">
     <div className="window-drag flex h-12 shrink-0 items-center justify-between px-3">
-      <div className="flex items-center gap-2 text-ui-base font-medium"><img src="./grok-mobile.png" className="size-5 rounded-md" alt="" />GrokDesk</div>
+      <div className="flex items-center gap-2 text-ui-base font-medium"><img src={grokIcon} className="size-5 rounded-md" alt="" />GrokDesk</div>
       <Button variant="ghost" size="icon-sm" className="window-no-drag text-foreground-subtle" aria-label={t('collapse')} title={t('collapse')} onClick={onCollapse}><PanelLeftClose /></Button>
     </div>
     <div className="flex shrink-0 flex-col gap-1 px-2 py-2">

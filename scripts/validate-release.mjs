@@ -20,7 +20,7 @@ for (const platform of ['win', 'mac', 'linux']) {
   assert.ok(config[platform].target.length >= 2);
   for (const target of config[platform].target) assert.deepEqual(target.arch, ['x64', 'arm64']);
 }
-for (const file of ['Assets/GrokDesk.ico', 'Assets/GrokDesk.icns', 'Assets/linux/512x512.png', 'build/before-pack.cjs', 'build/after-pack.cjs']) {
+for (const file of ['Assets/GrokDesk.ico', 'Assets/GrokDesk.icns', 'Assets/grok-mobile.png', 'build/before-pack.cjs', 'build/after-pack.cjs']) {
   assert.ok(existsSync(path.join(root, file)), `Missing build resource: ${file}`);
 }
 if (process.env.GITHUB_REF?.startsWith('refs/tags/')) {

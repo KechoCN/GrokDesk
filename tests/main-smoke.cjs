@@ -36,6 +36,7 @@ app.on('browser-window-created', (_event, created) => { win = created; win.show 
     await import(pathToFileURL(path.join(root, 'electron', 'main.mjs')).href);
     for (let i = 0; i < 150; i++) { if (win && !win.webContents.isLoading() && await script(`!!window.grokdesk && !!document.querySelector('[data-desktop-window-frame]')`)) break; await pause(50); }
     let snapshot = await script(`window.grokdesk.bootstrap()`);
+    assert.equal(await script(`Promise.all([...document.images].map(image => image.decode())).then(() => document.images.length > 0 && [...document.images].every(image => image.naturalWidth > 0))`), true, 'Bundled application icons must load');
     assert.equal(await script('window.grokdesk.platform'), process.platform);
     assert.equal(await script('window.grokdesk.version'), app.getVersion());
     assert.equal(snapshot.engine.state, 'missing');

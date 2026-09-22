@@ -44,16 +44,7 @@ npm start
 npm run package
 ```
 
-指定目标架构或仅生成应用目录：
-
-```sh
-npm run package -- --platform win --arch x64
-npm run package -- --platform mac --arch arm64
-npm run package -- --platform linux --arch x64
-npm run package -- --dir
-```
-
-输出位于 `dist/0.1.0/<platform>-<arch>/`。macOS 安装包必须在 macOS 构建；Linux 原生终端需要 Linux 编译工具链。完整依赖、调试、CI 与签名设置见 [构建指南](docs/building.md)。
+输出位于 `dist/0.1.0/<platform>-<arch>/`。各平台依赖、目标架构、调试、CI 与签名设置见 [构建指南](docs/building.md)。
 
 ## 仓库结构
 
@@ -63,7 +54,6 @@ Assets/           平台图标与来源说明
 build/            安装器和签名所需资源
 docs/             构建、平台行为与验证文档
 electron/         主进程、IPC、Grok 集成、浏览器扩展
-public/           前端静态资源
 renderer/         React 界面、样式与交互
 scripts/          跨平台构建、原生模块验证、校验和
 shared/           主进程与界面的类型合约

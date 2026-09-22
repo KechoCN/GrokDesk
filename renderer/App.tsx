@@ -2,6 +2,7 @@
 // ConversationDraftEmptyState and SidePaneTabTrigger, Apache-2.0.
 // Upstream: 872ad960de7ec172591f7e1952f7849229f94521. All actions use the GrokDesk bridge.
 import { useEffect, useRef, useState } from 'react';
+import grokIcon from '../Assets/grok-mobile.png';
 import { AlertCircle, Ellipsis, FolderOpen, Globe, LoaderCircle, Maximize2, MessageCircle, MessageCirclePlus, Minus, PanelLeft, PanelRight, Settings, ShieldCheck, SquareTerminal, X } from 'lucide-react';
 import type { AppSnapshot, Permission } from '../shared/api';
 import { DesktopWindowFrame } from './DesktopWindowFrame';
@@ -219,7 +220,7 @@ function DeskView({ state, run, notice, notify }: { state: AppSnapshot; run: Run
               <div className={cn('shrink-0', hasContent ? 'px-6 pb-4 pt-2' : 'w-full max-w-2xl self-center')}><div className="mx-auto w-full max-w-4xl"><Composer key={active.id} conversation={active} state={state} run={run} notify={notify} centered={!hasContent} terminalVisible={terminalVisible} onToggleTerminal={() => setTerminalVisible(value => !value)} /></div></div>
               {!hasContent && <div className="mt-4 flex items-center justify-center gap-2 text-ui-xs text-foreground-subtlest"><span className={`status-dot phase-${active.phase}`} /><span>{t(active.phase)}</span>{state.engine.version && <span>· Grok {state.engine.version}</span>}</div>}
             </ConversationDropZone>
-          </> : <div className="flex flex-1 flex-col items-center justify-center gap-5"><img src="./grok-mobile.png" alt="" className="size-14 rounded-xl" /><h1 className="text-ui-xl">{t('greeting')}</h1><Button variant="outline" onClick={() => newTask()}><MessageCirclePlus />{t('new')}</Button></div>}
+          </> : <div className="flex flex-1 flex-col items-center justify-center gap-5"><img src={grokIcon} alt="" className="size-14 rounded-xl" /><h1 className="text-ui-xl">{t('greeting')}</h1><Button variant="outline" onClick={() => newTask()}><MessageCirclePlus />{t('new')}</Button></div>}
           </div>
         </div>
         {terminalVisible && active && mode === 'build' && <><ResizeHandle label={L('终端高度', 'Terminal height')} orientation="horizontal" value={effectiveTerminalHeight} min={140} max={viewport.height - 290} reverse onChange={setTerminalHeight} onDragChange={setResizing} />{state.engine.state === 'ready' ? <TerminalPanel key={active.id} conversation={active} dark={dark} height={effectiveTerminalHeight} copyOnSelect={state.settings.copyOnSelect !== false} onClose={() => setTerminalVisible(false)} notify={notify} /> : <section className="flex h-16 shrink-0 items-center gap-2 rounded-xl border border-border bg-background px-4 text-ui-sm text-foreground-subtle"><SquareTerminal className="size-4" /><span className="flex-1">{t(state.engine.state === 'missing' || state.engine.state === 'error' ? 'engineMissing' : 'connecting')}</span><Button variant="ghost" size="icon-xs" aria-label={t('close')} onClick={() => setTerminalVisible(false)}><X /></Button></section>}</>}
@@ -239,6 +240,6 @@ function PlusIcon() { return <span aria-hidden="true" className="text-xl leading
 
 export default function App() {
   const { state, run, error, notice, setNotice } = useDesk();
-  if (!state) return <div className="startup flex h-dvh flex-col items-center justify-center gap-4 bg-background text-foreground">{error ? <><AlertCircle className="size-7" /><p className="max-w-xl px-6 text-center text-ui-base">{error === 'desktop' ? '请通过 GrokDesk 桌面程序打开此界面。' : error}</p></> : <><img src="./grok-mobile.png" alt="GrokDesk" className="size-14 rounded-xl" /><LoaderCircle className="size-5 animate-spin text-foreground-subtle" /></>}</div>;
+  if (!state) return <div className="startup flex h-dvh flex-col items-center justify-center gap-4 bg-background text-foreground">{error ? <><AlertCircle className="size-7" /><p className="max-w-xl px-6 text-center text-ui-base">{error === 'desktop' ? '请通过 GrokDesk 桌面程序打开此界面。' : error}</p></> : <><img src={grokIcon} alt="GrokDesk" className="size-14 rounded-xl" /><LoaderCircle className="size-5 animate-spin text-foreground-subtle" /></>}</div>;
   return <LanguageContext.Provider value={state.settings.language}><DeskView state={state} run={run} notice={notice} notify={setNotice} /></LanguageContext.Provider>;
 }

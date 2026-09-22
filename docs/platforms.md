@@ -24,6 +24,4 @@ AppImage 需要桌面环境与 FUSE 支持；缺少 FUSE 时可尝试 `--appimag
 
 项目、附件来源与 Grok 原生会话可能含系统绝对路径。迁移设备时应重新选择项目目录，并在目标设备安装 Grok、登录及配置扩展；不应直接复用另一台设备的扩展连接密钥。
 
-本次清理只针对源码工作目录内旧发行物与构建缓存，不删除系统用户数据、登录状态和外部项目。
-
 实现参考：[Electron 窗口定制](https://www.electronjs.org/docs/latest/tutorial/window-customization)、[原生菜单](https://www.electronjs.org/docs/latest/tutorial/application-menu)、[剪贴板](https://www.electronjs.org/docs/latest/api/clipboard)。

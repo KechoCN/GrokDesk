@@ -16,6 +16,8 @@ npm start
 
 `npm run dev` 启动 Vite；另一个终端将 `GROKDESK_DEV_URL` 设为 `http://127.0.0.1:5173` 后运行 `npm start`。PowerShell 使用 `$env:GROKDESK_DEV_URL='http://127.0.0.1:5173'`，POSIX shell 使用 `GROKDESK_DEV_URL=http://127.0.0.1:5173 npm start`。
 
+`dependencies` 仅保留主进程运行时需要的 `node-pty` 和 `smol-toml`；界面依赖由 Vite 打包，放在 `devDependencies`。构建自动生成 `renderer-dist/THIRD-PARTY-LICENSES.md`，随应用分发前端依赖的许可证。
+
 ## 安装包
 
 ```sh

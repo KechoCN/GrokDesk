@@ -1,5 +1,5 @@
 // Wrap the existing, attributed PNG in ICNS without changing any pixels.
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 const assets = new URL('../Assets/', import.meta.url);
 const png = await readFile(new URL('grok-mobile.png', assets));
@@ -11,6 +11,4 @@ icns.write('icns', 0); icns.writeUInt32BE(icns.length, 4);
 icns.write('ic09', 8); icns.writeUInt32BE(png.length + 8, 12);
 png.copy(icns, 16);
 await writeFile(new URL('GrokDesk.icns', assets), icns);
-await mkdir(new URL('linux/', assets), { recursive: true });
-await writeFile(new URL('linux/512x512.png', assets), png);
-console.log(`Platform icon containers generated in ${fileURLToPath(assets)}`);
+console.log(`macOS icon container generated in ${fileURLToPath(assets)}`);

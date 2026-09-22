@@ -11,7 +11,7 @@ GrokDesk adapts the ZCode desktop interface theme, presentation components and w
 The current import and adaptation scope is:
 
 - `renderer/DesktopWindowFrame.tsx`, from `packages/ui/src/DesktopWindowFrame.tsx`, with the local import alias adjusted.
-- `renderer/components/ui/{button,dialog,dropdown-menu,input,scroll-area,select,tabs,tooltip}.tsx`, from the corresponding `packages/ui/src/components/ui` files, with local imports adjusted.
+- `renderer/components/ui/{button,dialog,dropdown-menu,input,select}.tsx`, from the corresponding `packages/ui/src/components/ui` files, with local imports adjusted.
 - `renderer/components/lib/utils.ts`, from `packages/ui/src/components/lib/utils.ts`.
 - `renderer/styles.css`, retaining upstream typography, `@theme`, dark, `zaiLight` and `zaiDark` variables and scrollbar rules; GrokDesk layout/Markdown additions are marked at the end, and dependency imports are adapted.
 - `renderer/App.tsx`, adapting WorkspaceShellLayout, ConversationDraftEmptyState and SidePaneTabTrigger presentation.

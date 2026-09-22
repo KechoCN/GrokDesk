@@ -7,7 +7,6 @@ directories:
   buildResources: Assets
 files:
   - electron/**
-  - shared/**
   - renderer-dist/**
   - package.json
   - '!**/*.pdb'
@@ -88,7 +87,7 @@ dmg:
   sign: false
 linux:
   executableName: grokdesk
-  icon: Assets/linux/512x512.png
+  icon: Assets/grok-mobile.png
   category: Development
   maintainer: GrokDesk contributors
   synopsis: Unofficial Grok Build desktop workspace
