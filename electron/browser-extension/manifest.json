@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "GrokDesk 浏览器连接",
+  "version": "0.1.0",
+  "description": "使用本机浏览器的 Grok 登录会话，在 GrokDesk 同步聊天与账号资料。",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": ["http://127.0.0.1/*", "https://grok.com/*", "https://www.grok.com/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "GrokDesk 浏览器连接" },
+  "content_scripts": [{ "matches": ["https://grok.com/*", "https://www.grok.com/*"], "js": ["content.js"], "run_at": "document_idle" }]
+}

@@ -1,0 +1,28 @@
+name: Bug report / 问题反馈
+description: Report a reproducible GrokDesk problem / 提交可复现的问题
+body:
+  - type: input
+    id: version
+    attributes:
+      label: GrokDesk version / 版本
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: OS and architecture / 操作系统与架构
+      placeholder: Windows 11 x64 / macOS arm64 / Ubuntu x64
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps, expected behavior, actual behavior / 复现步骤、预期与实际表现
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots / 日志或截图
+      description: Remove account data, tokens, local paths and conversation content before uploading.

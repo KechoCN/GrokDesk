@@ -1,0 +1,25 @@
+.composer-context-bar { display: flex; align-items: center; gap: 5px; min-width: 0; margin: -9px 10px 0; padding: 14px 8px 6px; border-radius: 0 0 15px 15px; background: var(--color-surface); color: var(--color-foreground); }
+.composer-context-trigger { min-width: 0; gap: 6px; font-size: var(--text-ui-sm); height: 28px; }
+.composer-project-name { max-width: min(240px, 32vw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.composer-context-spacer { flex: 1; }
+.composer-context-terminal { flex-shrink: 0; color: var(--color-foreground-subtle); }
+.composer-context-terminal[aria-pressed="true"] { color: var(--color-foreground); background: var(--color-selected); }
+.composer-context-popover { z-index: 65; width: 280px; max-width: calc(100vw - 24px); max-height: min(420px, var(--radix-popover-content-available-height)); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--color-popover-border); border-radius: 16px; padding: 6px; background: var(--color-popover); color: var(--color-popover-foreground); box-shadow: 0 8px 28px #00000017, 0 2px 5px #0000000a; font-size: var(--text-ui-base); }
+.composer-extensions-popover { width: 360px; }
+.composer-picker-search { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 8px 9px; border-bottom: 1px solid var(--color-border); color: var(--color-foreground-subtlest); }
+.composer-picker-search input { min-width: 0; width: 100%; border: 0; outline: none; background: transparent; color: var(--color-foreground); font-size: var(--text-ui-base); }
+.composer-picker-search input::placeholder { color: var(--color-foreground-subtlest); }
+.composer-picker-results { overflow-y: auto; min-height: 0; padding: 5px 0; }
+.composer-picker-row { width: 100%; display: flex; align-items: center; gap: 9px; min-height: 34px; padding: 8px 10px; border-radius: 9px; text-align: left; color: var(--color-foreground); background: transparent; }
+.composer-picker-row:hover:not(:disabled), .composer-picker-row:focus-visible, .composer-picker-row.is-selected { background: var(--color-menu-hover); }
+.composer-picker-row:focus-visible, .composer-context-trigger:focus-visible, .composer-context-terminal:focus-visible { outline: 2px solid var(--color-input-border-focused); outline-offset: -2px; }
+.composer-picker-row:disabled { cursor: default; opacity: .6; }
+.composer-picker-row.is-selected:disabled { opacity: 1; }
+.composer-picker-actions { border-top: 1px solid var(--color-border); padding-top: 4px; flex-shrink: 0; }
+.composer-picker-message { padding: 14px 10px; font-size: var(--text-ui-sm); color: var(--color-foreground-subtle); line-height: 1.6; }
+.composer-picker-footnote { flex-shrink: 0; margin: 4px 4px 2px; padding: 9px 6px 4px; border-top: 1px solid var(--color-border); font-size: var(--text-ui-xs); line-height: 1.6; color: var(--color-foreground-subtle); }
+.composer-extension-row { align-items: flex-start; }
+.composer-extension-description { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 3px; font-size: var(--text-ui-sm); line-height: 1.5; color: var(--color-foreground-subtle); }
+.composer-extension-kind { padding-top: 2px; color: var(--color-foreground-subtlest); font-size: var(--text-ui-xs); white-space: nowrap; }
+.composer-picker-warning { padding: 8px 10px; display: flex; align-items: center; gap: 8px; font-size: var(--text-ui-sm); color: var(--color-destructive); }
+.composer-picker-warning span { flex: 1; }

@@ -1,0 +1,109 @@
+appId: io.grokdesk.desktop
+productName: GrokDesk
+copyright: Copyright © 2026 GrokDesk contributors
+electronVersion: 44.4.3
+directories:
+  output: dist/${version}/${os}-${arch}
+  buildResources: Assets
+files:
+  - electron/**
+  - shared/**
+  - renderer-dist/**
+  - package.json
+  - '!**/*.pdb'
+  - '!**/*.map'
+  - '!**/*.{test,spec}.{js,mjs,cjs,ts,tsx}'
+  - '!**/{test,tests,__tests__,test-d,benchmark,benchmarks}/**'
+asar: true
+# The native module, workers and spawn-helper must coexist as actual files.
+asarUnpack:
+  - node_modules/node-pty/**
+# Windows/macOS ship Node-API prebuilds. scripts/package.mjs enables Linux rebuilds.
+# Do not use beforeBuild=false: in builder 26.15 this also disables dependency collection.
+npmRebuild: false
+nodeGypRebuild: false
+beforePack: build/before-pack.cjs
+afterPack: build/after-pack.cjs
+extraResources:
+  - from: Assets
+    to: Assets
+    filter:
+      - GrokDesk.ico
+      - GrokDesk.icns
+      - grok-mobile.png
+      - NOTICE.md
+  - from: third-party
+    to: third-party
+    filter:
+      - '**/*'
+compression: normal
+forceCodeSigning: false
+publish: null
+win:
+  executableName: GrokDesk
+  icon: Assets/GrokDesk.ico
+  requestedExecutionLevel: asInvoker
+  # Keep PE icon/version editing even when no signing certificate is available.
+  signAndEditExecutable: true
+  signExecutable: false
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+    - target: portable
+      arch: [x64, arm64]
+nsis:
+  include: build/installer.nsh
+  artifactName: GrokDesk-${version}-win-${arch}-setup.${ext}
+  oneClick: false
+  perMachine: false
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: Assets/GrokDesk.ico
+  uninstallerIcon: Assets/GrokDesk.ico
+  installerHeaderIcon: Assets/GrokDesk.ico
+  shortcutName: GrokDesk
+  uninstallDisplayName: GrokDesk (Unofficial)
+  createDesktopShortcut: false
+  createStartMenuShortcut: true
+  deleteAppDataOnUninstall: false
+  runAfterFinish: false
+  installerLanguages: [zh_CN, zh_TW, en_US]
+portable:
+  artifactName: GrokDesk-${version}-win-${arch}-portable.${ext}
+  requestExecutionLevel: user
+mac:
+  icon: Assets/GrokDesk.icns
+  category: public.app-category.developer-tools
+  # Ad-hoc signing permits Apple Silicon execution; this is not notarization.
+  identity: '-'
+  hardenedRuntime: false
+  artifactName: GrokDesk-${version}-mac-${arch}.${ext}
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+dmg:
+  title: GrokDesk ${version}
+  sign: false
+linux:
+  executableName: grokdesk
+  icon: Assets/linux/512x512.png
+  category: Development
+  maintainer: GrokDesk contributors
+  synopsis: Unofficial Grok Build desktop workspace
+  artifactName: GrokDesk-${version}-linux-${arch}.${ext}
+  desktop:
+    entry:
+      Name: GrokDesk
+      StartupWMClass: GrokDesk
+      Terminal: 'false'
+      Keywords: Grok;AI;Development;Terminal;
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+    - target: deb
+      arch: [x64, arm64]
+deb:
+  packageCategory: devel
+  priority: optional

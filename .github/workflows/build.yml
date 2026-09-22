@@ -1,0 +1,104 @@
+name: Test and package
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      create_draft:
+        description: Create a draft release (select an existing version tag when running)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    name: ${{ matrix.platform }} / ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-2022, platform: win, arch: x64 }
+          - { os: windows-11-arm, platform: win, arch: arm64 }
+          - { os: macos-15-intel, platform: mac, arch: x64 }
+          - { os: macos-15, platform: mac, arch: arm64 }
+          - { os: ubuntu-24.04, platform: linux, arch: x64 }
+          - { os: ubuntu-24.04-arm, platform: linux, arch: arm64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          architecture: ${{ matrix.arch }}
+          cache: npm
+      - name: Install Linux build and GUI dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential python3 libgtk-3-0 libnss3 libasound2t64 libgbm1 libxss1 libxtst6 libsecret-1-0 libnotify4 libfuse2t64 xvfb
+      - run: npm ci --no-audit --no-fund
+      - run: npm run validate:release
+      - name: Verify manual draft target
+        if: inputs.create_draft && !startsWith(github.ref, 'refs/tags/')
+        run: node -e "throw new Error('Select an existing v<package version> tag when requesting a draft release.')"
+      - run: npm test
+      - run: npm run build
+      - name: Electron UI smoke tests
+        if: runner.os != 'Linux'
+        run: npm run test:smoke
+      - name: Electron UI smoke tests (virtual display)
+        if: runner.os == 'Linux'
+        # Ubuntu's hosted VM restricts Chromium user namespaces; this affects tests only.
+        run: xvfb-run --auto-servernum npm run test:smoke
+        env:
+          GROKDESK_TEST_NO_SANDBOX: '1'
+      - name: Package and verify native PTY
+        env:
+          TARGET_PLATFORM: ${{ matrix.platform }}
+          TARGET_ARCH: ${{ matrix.arch }}
+          DIRECTORY_ONLY: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')) }}
+        run: node scripts/ci-package.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: grokdesk-${{ matrix.platform }}-${{ matrix.arch }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            dist/*/${{ matrix.platform }}-${{ matrix.arch }}/*.exe
+            dist/*/${{ matrix.platform }}-${{ matrix.arch }}/*.dmg
+            dist/*/${{ matrix.platform }}-${{ matrix.arch }}/*.zip
+            dist/*/${{ matrix.platform }}-${{ matrix.arch }}/*.AppImage
+            dist/*/${{ matrix.platform }}-${{ matrix.arch }}/*.deb
+            dist/*/${{ matrix.platform }}-${{ matrix.arch }}/*-build.json
+            dist/*/${{ matrix.platform }}-${{ matrix.arch }}/SHA256SUMS.txt
+
+  draft-release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/') && (github.event_name == 'push' || inputs.create_draft)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: grokdesk-*
+          path: release-input
+      - run: node scripts/collect-release.mjs
+      - name: Create draft and upload verified assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" --verify-tag --draft --title "GrokDesk $RELEASE_TAG" --notes-file docs/releases/0.1.0.md release-assets/*

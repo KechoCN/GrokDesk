@@ -1,0 +1,25 @@
+{
+  "retrievedUtc": "2026-09-22T05:22:12.5153908+08:00",
+  "appStorePage": "https://apps.apple.com/us/app/grok-ai/id6670324846",
+  "metadataEndpoint": "https://itunes.apple.com/lookup?id=6670324846&country=us",
+  "appName": "Grok AI",
+  "seller": "X Corp.",
+  "mobileAppVersion": "1.4.42",
+  "sourceUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/4d/a9/62/4da96255-50a3-5c1b-2efc-e20e1286a7fb/AppIcon-0-0-1x_U007epad-0-0-0-1-0-0-0-85-220.png/512x512bb.jpg",
+  "sourceFile": "grok-mobile-original.jpg",
+  "sourceSha256": "2ba594da2b6bf92d9ae330c518778f5259c163b0c105c264e4b142ab6aa75487",
+  "relationship": "GrokDesk is an independent, unofficial client. The Grok app icon is reproduced at the user's request; all rights remain with its owner. No sponsorship, endorsement, or redistribution license is implied.",
+  "generatedIconSha256": "dbe517f1124e7c5e22ec56aa2ee8595d06cc2c3ffbd57a01ca2a3696024925c1",
+  "pngSha256": "77f4bbb297406c9a58816802fcf6c8a892ebcaa89fcd7578ce1b3e04908a2c5b",
+  "iconSizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    128,
+    256
+  ]
+}

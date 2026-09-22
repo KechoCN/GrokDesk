@@ -1,0 +1,12 @@
+.markdown .output-block { width:100%; min-width:0; max-width:100%; margin:1em 0; border:1px solid var(--color-border); border-radius:22px; background:var(--color-background); }
+.output-block-header { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0; padding:9px 11px 3px 15px; color:var(--color-foreground-subtle); font-size:12px; line-height:1.5; }
+.output-block-label { display:flex; align-items:center; gap:7px; min-width:0; }
+.output-block-label > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.output-block-label svg,.output-block-copy svg { flex-shrink:0; }
+.output-block-copy { display:inline-flex; flex-shrink:0; align-items:center; justify-content:center; gap:6px; min-height:30px; padding:5px 9px; border:1px solid transparent; border-radius:9px; color:var(--color-foreground-subtle); white-space:nowrap; }
+.output-block-copy:hover { color:var(--color-foreground); background:var(--color-hover); border-color:var(--color-border); }
+.output-block-body { min-width:0; padding:8px 16px 18px; }
+.markdown .output-block pre { margin:0; max-width:100%; max-height:none; padding:0; overflow:visible; border:0; border-radius:0; background:transparent; white-space:pre-wrap; overflow-wrap:anywhere; word-break:normal; font-family:var(--font-mono); font-size:var(--text-ui-sm); line-height:1.8; tab-size:4; }
+.markdown .output-block pre code { font:inherit; white-space:inherit; overflow-wrap:inherit; word-break:inherit; }
+.markdown .output-block[data-kind="text"] pre { font-family:inherit; font-size:var(--text-ui-base); line-height:1.85; }
+.markdown .output-block-error { margin:4px 16px; font-size:var(--text-ui-sm); color:var(--color-destructive); }

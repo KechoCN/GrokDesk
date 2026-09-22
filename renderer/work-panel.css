@@ -1,0 +1,46 @@
+.conversation-workspace { display: flex; flex: 1; min-width: 0; min-height: 0; align-items: stretch; }
+.work-panel { flex: 0 0 270px; align-self: flex-start; width: 270px; max-height: calc(100% - 16px); overflow-y: auto; margin: 4px 16px 12px 0; padding: 4px 16px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-card); color: var(--color-foreground); box-shadow: 0 3px 10px #00000008; font-size: var(--text-ui-sm); scrollbar-width: thin; }
+.work-panel button { cursor: pointer; }
+.work-panel button:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 3px; border-radius: 4px; }
+.work-panel button:hover { color: var(--color-foreground); }
+.work-panel-section { padding: 10px 0 12px; }
+.work-panel-section + .work-panel-section { border-top: 1px solid var(--color-border); }
+.work-panel-section-heading { display: flex; align-items: center; gap: 5px; }
+.work-panel-section-toggle { display: flex; align-items: center; gap: 5px; flex: 1; width: 100%; min-width: 0; text-align: left; line-height: 22px; }
+.work-panel-section-toggle > svg { width: 11px; height: 11px; color: var(--color-foreground-subtlest); }
+.work-panel-count { flex-shrink: 0; margin-left: auto; border-radius: 10px; padding: 0 6px; background: var(--color-surface); color: var(--color-foreground-subtlest); font-size: var(--text-ui-xs); line-height: 18px; font-variant-numeric: tabular-nums; }
+.work-panel-collapse { display: flex; align-items: center; justify-content: center; width: 21px; height: 22px; flex-shrink: 0; color: var(--color-foreground-subtlest); }
+.work-panel-collapse svg { width: 13px; height: 13px; }
+.work-panel-section-content { margin-top: 3px; }
+.work-panel-tasks, .work-panel-files { list-style: none; padding: 0; margin: 0; }
+.work-panel-tasks li { display: flex; align-items: flex-start; gap: 8px; padding: 3px 0; color: var(--color-foreground-subtle); line-height: 1.5; }
+.work-task-icon { width: 13px; height: 13px; margin-top: 4px; flex-shrink: 0; color: var(--color-foreground-subtlest); stroke-width: 1.5; }
+.work-task-icon.is-complete { color: var(--color-success); }
+.work-task-icon.is-failed { color: var(--color-destructive); }
+.work-task-icon.is-running { animation: work-panel-spin 1.6s linear infinite; color: var(--color-foreground-subtle); }
+.work-panel-task-text { min-width: 0; overflow-wrap: anywhere; }
+.work-panel-caption { margin: 0 0 4px; color: var(--color-foreground-subtlest); font-size: var(--text-ui-xs); }
+.work-panel-empty { margin: 1px 0 0; color: var(--color-foreground-subtlest); line-height: 24px; }
+.work-panel-files li > button { display: flex; align-items: center; gap: 7px; min-width: 0; width: 100%; padding: 4px 0; text-align: left; color: var(--color-foreground-subtle); }
+.work-panel-files button > svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--color-foreground-subtlest); }
+.work-panel-files button > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.work-panel-project { display: flex; align-items: center; gap: 5px; }
+.work-panel-project > button:first-child { flex: 1; }
+.work-panel-files .work-panel-open-folder { width: 22px; justify-content: center; flex-shrink: 0; }
+.work-panel.is-collapsed { flex-basis: auto; width: auto; padding: 0; border-radius: 12px; }
+.work-panel-reopen { display: flex; align-items: center; gap: 7px; padding: 9px 11px; color: var(--color-foreground-subtle); font-size: var(--text-ui-xs); }
+.work-panel-reopen svg { width: 14px; height: 14px; }
+.work-panel-reopen svg:last-child { width: 11px; height: 11px; }
+@keyframes work-panel-spin { to { transform: rotate(360deg); } }
+/* Stack the card in the available conversation width, including when a preview
+   pane is open. It never floats over messages or the composer. */
+@container (max-width: 850px) {
+  .conversation-workspace { flex-direction: column; }
+  .conversation-workspace > .work-panel { order: -1; flex: 0 0 auto; align-self: stretch; width: auto; max-height: 180px; margin: 0 16px 8px; border-radius: 15px; }
+  .conversation-workspace > .work-panel.is-collapsed { align-self: flex-end; }
+  .work-panel-section { padding-top: 7px; padding-bottom: 7px; }
+}
+@container (max-height: 430px) {
+  .conversation-workspace > .work-panel:not(.is-collapsed) { max-height: 118px; }
+}
+@media (prefers-reduced-motion: reduce) { .work-task-icon.is-running { animation: none; } }
