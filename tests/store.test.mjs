@@ -28,7 +28,7 @@ test('project switch carries unsent draft and snapshot bytes while keeping origi
   source.attachments = [{ id:'file', name:'fixture.txt', path:original, sourcePath:path.join(root,'original.txt'), mime:'text/plain', kind:'text', size:14 }];
   const target = store.setConversationWorkspace(source.id, project.id);
   assert.notEqual(target.id, source.id);
-  assert.equal(target.cwd, fs.realpathSync(root));
+  assert.equal(target.cwd, fs.realpathSync.native(root));
   assert.equal(target.workspaceId, project.id);
   assert.equal(target.draft, 'Unsent next step');
   assert.equal(target.engineSessionId, undefined);

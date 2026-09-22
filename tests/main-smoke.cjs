@@ -6,8 +6,15 @@ const os = require('node:os');
 const assert = require('node:assert/strict');
 const { pathToFileURL } = require('node:url');
 // Optionally exercise the exact ASAR shipped in a release, including dependency resolution.
-const root = process.argv[2] ? path.resolve(process.argv[2]) : path.resolve(__dirname, '..');
-const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'grokdesk-main-'));
+// Electron preserves switches before the script in argv (CI adds --no-sandbox).
+// Prefer --app-root=; keep the original positional override after this script.
+const rootArgument = process.argv.find(argument => argument.startsWith('--app-root='));
+const scriptIndex = process.argv.findIndex(argument => !argument.startsWith('-') && path.resolve(argument) === __filename);
+const positionalRoot = scriptIndex >= 0 ? process.argv[scriptIndex + 1] : undefined;
+const root = rootArgument ? path.resolve(rootArgument.slice('--app-root='.length))
+  : positionalRoot && !positionalRoot.startsWith('-') ? path.resolve(positionalRoot) : path.resolve(__dirname, '..');
+// Match native canonical paths: macOS /private/var and Windows 8.3 TEMP aliases.
+const profile = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'grokdesk-main-')));
 const project = path.join(profile, 'My chosen project'); fs.mkdirSync(project);
 const selectedFile = path.join(project, 'context.md'); fs.writeFileSync(selectedFile, 'User context');
 fs.writeFileSync(path.join(profile, 'desktop-state.json'), JSON.stringify({
@@ -34,13 +41,13 @@ app.on('browser-window-created', (_event, created) => { win = created; win.show 
     assert.equal(snapshot.engine.state, 'missing');
     assert.equal(snapshot.conversations.length, 1, 'Unknown imported history must survive startup');
     snapshot = await script(`window.grokdesk.addWorkspace()`);
-    assert.equal(snapshot.workspaces[0].path, fs.realpathSync(project));
+    assert.equal(snapshot.workspaces[0].path, fs.realpathSync.native(project));
     assert.deepEqual(pickerOptions.properties, ['openDirectory', 'createDirectory']);
     const workspaceId = snapshot.workspaces[0].id;
     assert.equal(snapshot.selectedWorkspaceId, workspaceId, 'Folder picker did not report its selected project');
     snapshot = await script(`window.grokdesk.newConversation(${JSON.stringify(workspaceId)})`);
     const emptyId = snapshot.activeConversationId;
-    assert.equal(snapshot.conversations.find(c => c.id === emptyId).cwd, fs.realpathSync(project));
+    assert.equal(snapshot.conversations.find(c => c.id === emptyId).cwd, fs.realpathSync.native(project));
     snapshot = await script(`window.grokdesk.newConversation(${JSON.stringify(workspaceId)})`);
     assert.equal(snapshot.conversations.some(c => c.id === emptyId), false, 'Abandoned empty task was not deleted');
     const draftId = snapshot.activeConversationId;
