@@ -1,9 +1,16 @@
 // Executed by the packaged Electron with ELECTRON_RUN_AS_NODE=1.
 const assert = require('node:assert/strict');
-const [modulePath, expectedArch] = process.argv.slice(2);
+const { createRequire } = require('node:module');
+const path = require('node:path');
+const [archivePath, expectedArch] = process.argv.slice(2);
 assert.ok(process.versions.electron, 'Smoke test must use the packaged Electron runtime.');
 assert.equal(process.arch, expectedArch);
-const pty = require(modulePath);
+assert.ok(path.isAbsolute(archivePath) && path.basename(archivePath) === 'app.asar', 'Pass the packaged app.asar, not its unpacked dependency directory.');
+// Match the app's module resolution. Loading node-pty directly from app.asar.unpacked
+// triggers its Unix helper-path rewrite twice (microsoft/node-pty#923).
+const appRequire = createRequire(path.join(archivePath, 'package.json'));
+assert.ok(appRequire.resolve('node-pty').startsWith(`${archivePath}${path.sep}`), 'node-pty must resolve through the packaged ASAR.');
+const pty = appRequire('node-pty');
 const shell = process.platform === 'win32' ? (process.env.ComSpec || 'C:\\Windows\\System32\\cmd.exe') : '/bin/sh';
 const suffix = `PTY_${Date.now()}`;
 const token = `GROKDESK_${suffix}`;

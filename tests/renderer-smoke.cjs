@@ -8,14 +8,31 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'grokdesk-renderer-'));
 app.setPath('userData', profile);
+// Xvfb has no hardware compositor. A hidden Linux window can have no Viz surface,
+// so map this fixture onto the CI virtual display and render it in software.
+// Keep local desktop runs hidden and leave the production GPU policy unchanged.
+const linuxCI = process.platform === 'linux' && process.env.CI === 'true';
+if (linuxCI) app.disableHardwareAcceleration();
 let win;
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const script = source => win.webContents.executeJavaScript(source);
-async function capture() {
-  // Wake the hidden compositor before capturing its newest frame.
-  await win.webContents.capturePage(undefined, { stayHidden: true, stayAwake: true });
-  await pause(80);
-  return win.webContents.capturePage(undefined, { stayHidden: true, stayAwake: true });
+async function capture(label) {
+  const options = { stayHidden: !linuxCI, stayAwake: true };
+  let lastError;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      // Refresh the compositor after theme changes/resizes before reading pixels.
+      await win.webContents.capturePage(undefined, options);
+      await pause(100);
+      const image = await win.webContents.capturePage(undefined, options);
+      assert.ok(!image.isEmpty() && image.getSize().width > 0 && image.getSize().height > 0, `${label}: empty screenshot`);
+      return image;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 4) await pause(150 * attempt);
+    }
+  }
+  throw new Error(`${label}: page capture failed after 4 attempts (${lastError?.message || lastError})`, { cause: lastError });
 }
 async function until(source, message) {
   for (let i = 0; i < 80; i++) { if (await script(source)) return; await pause(50); }
@@ -28,7 +45,7 @@ async function input(value) {
 async function key(keyCode) { win.webContents.sendInputEvent({ type: 'keyDown', keyCode }); win.webContents.sendInputEvent({ type: 'keyUp', keyCode }); await pause(100); }
 app.whenReady().then(async () => {
   try {
-    win = new BrowserWindow({ show: false, width: 1440, height: 960, webPreferences: { preload: path.join(__dirname, 'renderer-fixture.cjs'), contextIsolation: true, sandbox: true, backgroundThrottling: false } });
+    win = new BrowserWindow({ show: linuxCI, width: 1440, height: 960, webPreferences: { preload: path.join(__dirname, 'renderer-fixture.cjs'), contextIsolation: true, sandbox: true, backgroundThrottling: false } });
     const errors = [];
     win.webContents.on('console-message', (...args) => {
       const details = args[1];
@@ -73,33 +90,33 @@ app.whenReady().then(async () => {
     await until(`!!document.querySelector('[role="dialog"]')`, 'Settings dialog did not open');
     const out = path.join(root, 'artifacts', 'verification'); fs.mkdirSync(out, { recursive: true });
     await pause(200);
-    fs.writeFileSync(path.join(out, 'settings-themes.png'), (await capture()).toPNG());
+    fs.writeFileSync(path.join(out, 'settings-themes.png'), (await capture('settings-themes')).toPNG());
     for (const theme of ['lagoon', 'midnight', 'forest', 'rose']) {
       const labels = { lagoon: '晴湾', midnight: '星夜', forest: '苔林', rose: '蔷薇' };
       await script(`Array.from(document.querySelectorAll('button.theme-card')).find(button => button.textContent.includes(${JSON.stringify(labels[theme])})).click()`);
       await pause(150);
       assert.equal(await script(`document.documentElement.classList.contains('theme-${theme}')`), true, `Theme ${theme} was not applied`);
-      fs.writeFileSync(path.join(out, `${theme}.png`), (await capture()).toPNG());
+      fs.writeFileSync(path.join(out, `${theme}.png`), (await capture(theme)).toPNG());
     }
     await script(`Array.from(document.querySelectorAll('[role="dialog"] nav button')).find(button => button.textContent.includes('订阅与用量')).click()`);
     await until(`document.body.textContent.includes('Test plan') && document.body.textContent.includes('72.0%')`, 'Cloud subscription UI did not display returned plan and quota');
     await pause(150);
-    fs.writeFileSync(path.join(out, 'account.png'), (await capture()).toPNG());
+    fs.writeFileSync(path.join(out, 'account.png'), (await capture('account')).toPNG());
     await script(`Array.from(document.querySelectorAll('[role="dialog"] nav button')).find(button => button.textContent.includes('Grok 完整设置')).click()`);
     await until(`document.querySelector('.settings-config-editor')?.value.includes('fixture')`, 'Full config editor did not show loaded TOML');
     await pause(150);
-    fs.writeFileSync(path.join(out, 'engine-settings.png'), (await capture()).toPNG());
+    fs.writeFileSync(path.join(out, 'engine-settings.png'), (await capture('engine-settings')).toPNG());
     await key('Escape');
     await input('/');
     await until(`!!document.querySelector('[role="listbox"]')`, 'Completion list missing after theme switch');
     const menuVisible = await script(`(() => { const menu = document.querySelector('[role="listbox"]'); const r = menu.getBoundingClientRect(); return r.height > 10 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth; })()`);
     assert.ok(menuVisible, 'Completion menu is outside the viewport');
-    fs.writeFileSync(path.join(out, 'composer-completion.png'), (await capture()).toPNG());
+    fs.writeFileSync(path.join(out, 'composer-completion.png'), (await capture('composer-completion')).toPNG());
     win.setContentSize(960, 640);
     await pause(300);
     const compactVisible = await script(`(() => { const r = document.querySelector('[role="listbox"]').getBoundingClientRect(); return r.height > 10 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth; })()`);
     assert.ok(compactVisible, 'Completion menu is clipped at 960 × 640');
-    fs.writeFileSync(path.join(out, 'compact-completion.png'), (await capture()).toPNG());
+    fs.writeFileSync(path.join(out, 'compact-completion.png'), (await capture('compact-completion')).toPNG());
     assert.deepEqual(errors, [], 'Renderer errors');
     console.log('Renderer smoke passed: completions, keyboard selection, attachments, project entry, title drag regions, theme application.');
     win.destroy(); app.exit(0);

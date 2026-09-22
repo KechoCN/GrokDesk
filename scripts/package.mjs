@@ -172,7 +172,7 @@ try {
     if (validation.status !== 0) throw new Error('The packaged macOS app has no valid stapled notarization ticket.');
   }
   if (nativeHost) {
-    const smoke = spawnSync(executable, [path.join(root, 'scripts/native-smoke.cjs'), nativeModule, options.arch], {
+    const smoke = spawnSync(executable, [path.join(root, 'scripts/native-smoke.cjs'), archive, options.arch], {
       cwd: root, env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, stdio: 'inherit', windowsHide: true, timeout: 25_000,
     });
     if (smoke.error) throw smoke.error;

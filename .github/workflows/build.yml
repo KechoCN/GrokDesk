@@ -66,6 +66,14 @@ jobs:
           TARGET_ARCH: ${{ matrix.arch }}
           DIRECTORY_ONLY: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')) }}
         run: node scripts/ci-package.mjs
+      - name: Preserve native UI verification screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-${{ matrix.platform }}-${{ matrix.arch }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: artifacts/verification/*.png
       - uses: actions/upload-artifact@v4
         with:
           name: grokdesk-${{ matrix.platform }}-${{ matrix.arch }}
