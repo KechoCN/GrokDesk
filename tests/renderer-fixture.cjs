@@ -62,5 +62,15 @@ const api = {
   openExternal: async () => {}, openFolder: async () => {}, setConfig: async () => {}, window: async () => {},
   onEvent: listener => { listeners.add(listener); return () => listeners.delete(listener); },
 };
+let firstComposerFonts = null;
+if (api.platform === 'linux') {
+  const observer = new MutationObserver(() => {
+    if (!document.querySelector('textarea.composer-text')) return;
+    firstComposerFonts = [...document.fonts].filter(font => font.family.replaceAll(/['"]/g, '') === 'GrokDesk Noto Sans SC').map(font => font.status);
+    observer.disconnect();
+  });
+  observer.observe(document, { childList: true, subtree: true });
+}
+api.firstComposerFonts = () => clone(firstComposerFonts);
 contextBridge.exposeInMainWorld('grokdesk', api);
 contextBridge.exposeInMainWorld('grokdeskTest', { calls: () => clone(calls), state: () => clone(state), nativeClipboard: value => { nativeClipboard = value; }, clipboardBehavior: value => { if (!['normal', 'reject', 'hang'].includes(value)) throw new Error('Invalid clipboard fixture behavior'); clipboardBehavior = value; }, pendingClipboard: () => pendingClipboard.length, releaseClipboard: () => { const pending = pendingClipboard.splice(0); for (const resolve of pending) resolve(); return pending.length; }, contextFailure: value => { contextFailure = value; }, setWorkspaces: value => { state.workspaces = value; changed(); }, setConversations: (value, activeId) => { state.conversations = value; state.activeConversationId = activeId; changed(); }, setWeb: value => { Object.assign(webState, value); for (const listener of listeners) listener({ type:'web', state:clone(webState) }); }, setPhase: value => { state.conversations[0].phase = value; changed(); }, emitTerminal: data => { for (const listener of listeners) listener({ type: 'terminal', conversationId: 'conversation', sequence: ++terminalSequence, data }); } });

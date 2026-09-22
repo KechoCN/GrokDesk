@@ -32,12 +32,11 @@ app.whenReady().then(async () => {
       const bodyFont = await script('getComputedStyle(document.body).fontFamily');
       assert.equal(bodyFont.includes('GrokDesk Noto Sans SC'), platform === 'linux', `${platform}: bundled CJK font must only enter the Linux fallback stack`);
       if (platform === 'linux') {
-        const loaded = await script(`(async () => {
-          const fonts = await document.fonts.load('14px "GrokDesk Noto Sans SC"', '添加项目聊天设置简体中文繁體中文龘麤齉');
-          await document.fonts.ready;
-          return fonts.length > 0 && fonts.every(font => font.status === 'loaded');
+        const loaded = await script(`(() => {
+          const fonts = window.grokdesk.firstComposerFonts();
+          return fonts?.length > 0 && fonts.every(status => status === 'loaded');
         })()`);
-        assert.equal(loaded, true, 'Linux CJK font did not load from the bundled renderer assets');
+        assert.equal(loaded, true, 'Linux composer mounted before the bundled CJK font loaded');
         const offlineFont = fontRequests.some(url => url.startsWith('file:') && url.includes('noto-sans-sc-full-wght') && url.endsWith('.woff2'));
         assert.equal(offlineFont, true, 'Linux CJK font was not loaded offline from the packaged file URL');
         await script(`document.querySelector('button[aria-label="原版 TUI"]').click()`);
@@ -71,6 +70,16 @@ app.whenReady().then(async () => {
       win.destroy();
       console.log(`${platform}: frame, native-control clearance, shortcuts, engine path and runtime About passed`);
     }
+    // A missing/corrupt local font must warn and still mount the desktop.
+    win = new BrowserWindow({ show: false, webPreferences: { preload: path.join(__dirname, 'renderer-fixture.cjs'), contextIsolation: true, sandbox: true, partition: 'grokdesk-font-failure', additionalArguments: ['--grokdesk-test-platform=linux'] } });
+    const warnings = [];
+    win.webContents.on('console-message', details => { if (details?.level === 'warning') warnings.push(details.message); });
+    win.webContents.session.webRequest.onBeforeRequest((details, callback) => callback({ cancel: details.resourceType === 'font' }));
+    await win.loadFile(path.join(root, 'renderer-dist', 'index.html'));
+    await until(`!!document.querySelector('textarea.composer-text')`, 'Linux font failure prevented the desktop from starting');
+    assert.ok(warnings.some(message => message.includes('bundled Linux CJK font failed to load')), 'Linux font failure did not produce the startup warning');
+    win.destroy();
+    console.log('linux: failed local font load warns and still starts the desktop');
     app.exit(0);
   } catch (error) { console.error(error); app.exit(1); }
 });

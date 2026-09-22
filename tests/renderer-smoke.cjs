@@ -48,13 +48,16 @@ app.whenReady().then(async () => {
   try {
     win = new BrowserWindow({ show: linuxCI, width: 1440, height: 960, webPreferences: { preload: path.join(__dirname, 'renderer-fixture.cjs'), contextIsolation: true, sandbox: true, backgroundThrottling: false } });
     const errors = [];
-    win.webContents.on('console-message', (...args) => {
-      const details = args[1];
-      if (typeof details === 'object' && details.level === 'error') errors.push(details.message);
-    });
+    win.webContents.on('console-message', details => { if (details?.level === 'error') errors.push(details.message); });
     await win.loadFile(path.join(root, 'renderer-dist', 'index.html'));
     await win.webContents.insertCSS('*, *::before, *::after { transition: none !important; animation: none !important; }');
     await until(`!!document.querySelector('textarea.composer-text')`, 'Composer did not mount');
+    if (process.platform === 'linux') {
+      assert.equal(await script(`(() => {
+        const fonts = window.grokdesk.firstComposerFonts();
+        return fonts?.length > 0 && fonts.every(status => status === 'loaded');
+      })()`), true, 'Linux composer mounted before the bundled CJK font loaded');
+    }
     assert.equal(await script(`document.body.textContent.includes('添加现有文件夹') || document.body.textContent.includes('新建工作区')`), false);
     await input('/');
     await until(`document.body.textContent.includes('example-skill') && document.body.textContent.includes('example-plugin')`, 'Slash completion missing installed skills or plugins');
