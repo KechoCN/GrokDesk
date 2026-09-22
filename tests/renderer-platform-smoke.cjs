@@ -31,6 +31,13 @@ app.whenReady().then(async () => {
       assert.equal(await script(`document.documentElement.dataset.platform`), platform);
       const bodyFont = await script('getComputedStyle(document.body).fontFamily');
       assert.equal(bodyFont.includes('GrokDesk Noto Sans SC'), platform === 'linux', `${platform}: bundled CJK font must only enter the Linux fallback stack`);
+      const placeholderSelectors = ['.sidebar input', 'textarea.composer-text'];
+      for (const selector of placeholderSelectors) {
+        const inputFont = await script(`getComputedStyle(document.querySelector(${JSON.stringify(selector)})).fontFamily`);
+        assert.equal(inputFont, bodyFont, `${platform}: ${selector} text must retain the platform font stack`);
+        const placeholderFont = await script(`getComputedStyle(document.querySelector(${JSON.stringify(selector)}), '::placeholder').fontFamily`);
+        assert.equal(placeholderFont.split(',')[0].replaceAll(/['"]/g, '').trim() === 'GrokDesk Noto Sans SC', platform === 'linux', `${platform}: only Linux ${selector} placeholders should prefer the bundled CJK font`);
+      }
       if (platform === 'linux') {
         const loaded = await script(`(() => {
           const fonts = window.grokdesk.firstComposerFonts();
@@ -39,6 +46,25 @@ app.whenReady().then(async () => {
         assert.equal(loaded, true, 'Linux composer mounted before the bundled CJK font loaded');
         const offlineFont = fontRequests.some(url => url.startsWith('file:') && url.includes('noto-sans-sc-full-wght') && url.endsWith('.woff2'));
         assert.equal(offlineFont, true, 'Linux CJK font was not loaded offline from the packaged file URL');
+        // Inspect the font actually used for input and textarea placeholder glyphs,
+        // rather than accepting an inherited CSS stack that still renders tofu.
+        win.webContents.debugger.attach('1.3');
+        try {
+          await win.webContents.debugger.sendCommand('DOM.enable');
+          await win.webContents.debugger.sendCommand('CSS.enable');
+          const { root: documentNode } = await win.webContents.debugger.sendCommand('DOM.getDocument');
+          for (const selector of placeholderSelectors) {
+            const placeholder = await script(`(() => { const input = document.querySelector(${JSON.stringify(selector)}); return input.value === '' ? input.placeholder : ''; })()`);
+            assert.ok(placeholder.length > 0, `Linux ${selector}: initial placeholder must be visible for font verification`);
+            const { nodeId } = await win.webContents.debugger.sendCommand('DOM.querySelector', { nodeId: documentNode.nodeId, selector });
+            const { fonts } = await win.webContents.debugger.sendCommand('CSS.getPlatformFontsForNode', { nodeId });
+            assert.ok(fonts.length > 0 && fonts.every(font => font.isCustomFont && font.postScriptName.startsWith('NotoSansSC')), `Linux ${selector}: placeholder did not render with the bundled CJK font`);
+            const glyphs = fonts.reduce((count, font) => count + font.glyphCount, 0);
+            assert.ok(glyphs >= [...placeholder.matchAll(/\p{Script=Han}/gu)].length, `Linux ${selector}: missing placeholder Han glyphs`);
+          }
+        } finally {
+          win.webContents.debugger.detach();
+        }
         await script(`document.querySelector('button[aria-label="原版 TUI"]').click()`);
         await until(`!!document.querySelector('.terminal-panel .xterm')`, 'Linux terminal did not mount');
         await script('document.fonts.ready.then(() => true)');

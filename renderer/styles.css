@@ -690,6 +690,8 @@ body { overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, B
 html[data-platform="darwin"] body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", sans-serif; }
 html[data-platform="linux"] { --font-mono: ui-monospace, "DejaVu Sans Mono", "Liberation Mono", "Noto Sans CJK SC", "GrokDesk Noto Sans SC", monospace; }
 html[data-platform="linux"] body { font-family: system-ui, "Ubuntu", "Cantarell", "Noto Sans", "Noto Sans CJK SC", "GrokDesk Noto Sans SC", sans-serif; }
+html[data-platform="linux"] input::placeholder,
+html[data-platform="linux"] textarea::placeholder { font-family: "GrokDesk Noto Sans SC", system-ui, sans-serif; }
 button, input, textarea, select { font: inherit; }
 button:not(:disabled), summary { cursor: pointer; }
 button:disabled { cursor: default; }

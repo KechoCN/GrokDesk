@@ -59,6 +59,8 @@ app.whenReady().then(async () => {
       })()`), true, 'Linux composer mounted before the bundled CJK font loaded');
     }
     assert.equal(await script(`document.body.textContent.includes('添加现有文件夹') || document.body.textContent.includes('新建工作区')`), false);
+    const out = path.join(root, 'artifacts', 'verification'); fs.mkdirSync(out, { recursive: true });
+    fs.writeFileSync(path.join(out, 'initial-workspace.png'), (await capture('initial-workspace')).toPNG());
     await input('/');
     await until(`document.body.textContent.includes('example-skill') && document.body.textContent.includes('example-plugin')`, 'Slash completion missing installed skills or plugins');
     await key('Escape');
@@ -92,7 +94,6 @@ app.whenReady().then(async () => {
     assert.ok(dragRegion > 5, 'Top header has no usable window drag area');
     await script(`document.querySelector('button[title="设置"]').click()`);
     await until(`!!document.querySelector('[role="dialog"]')`, 'Settings dialog did not open');
-    const out = path.join(root, 'artifacts', 'verification'); fs.mkdirSync(out, { recursive: true });
     await pause(200);
     fs.writeFileSync(path.join(out, 'settings-themes.png'), (await capture('settings-themes')).toPNG());
     for (const theme of ['lagoon', 'midnight', 'forest', 'rose']) {
