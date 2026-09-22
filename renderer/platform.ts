@@ -10,7 +10,9 @@ export const terminalFontFamily = isMac
   ? 'Menlo, Monaco, "SFMono-Regular", "PingFang SC", monospace'
   : isWindows
     ? '"Cascadia Mono", Consolas, "Microsoft YaHei UI", monospace'
-    : '"DejaVu Sans Mono", "Liberation Mono", "Noto Sans CJK SC", monospace';
+    : platform === 'linux'
+      ? '"DejaVu Sans Mono", "Liberation Mono", "Noto Sans CJK SC", "GrokDesk Noto Sans SC", monospace'
+      : 'monospace';
 
 type Modifiers = { ctrlKey: boolean; metaKey: boolean; altKey?: boolean; shiftKey?: boolean };
 

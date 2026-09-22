@@ -17,6 +17,7 @@ let win;
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const script = source => win.webContents.executeJavaScript(source);
 async function capture(label) {
+  await script('document.fonts.ready.then(() => true)');
   const options = { stayHidden: !linuxCI, stayAwake: true };
   let lastError;
   for (let attempt = 1; attempt <= 4; attempt++) {

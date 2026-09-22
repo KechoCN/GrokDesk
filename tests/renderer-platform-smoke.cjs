@@ -20,10 +20,34 @@ app.whenReady().then(async () => {
     for (const platform of ['win32', 'darwin', 'linux']) {
       win = new BrowserWindow({ show: false, width: 1440, height: 960, webPreferences: { preload: path.join(__dirname, 'renderer-fixture.cjs'), contextIsolation: true, sandbox: true, backgroundThrottling: false, additionalArguments: [`--grokdesk-test-platform=${platform}`] } });
       const errors = [];
+      const fontRequests = [];
+      win.webContents.session.webRequest.onBeforeRequest((details, callback) => {
+        if (details.resourceType === 'font') fontRequests.push(details.url);
+        callback({});
+      });
       win.webContents.on('console-message', details => { if (details?.level === 'error') errors.push(details.message); });
       await win.loadFile(path.join(root, 'renderer-dist', 'index.html'));
       await until(`!!document.querySelector('textarea.composer-text')`, `${platform}: composer did not mount`);
       assert.equal(await script(`document.documentElement.dataset.platform`), platform);
+      const bodyFont = await script('getComputedStyle(document.body).fontFamily');
+      assert.equal(bodyFont.includes('GrokDesk Noto Sans SC'), platform === 'linux', `${platform}: bundled CJK font must only enter the Linux fallback stack`);
+      if (platform === 'linux') {
+        const loaded = await script(`(async () => {
+          const fonts = await document.fonts.load('14px "GrokDesk Noto Sans SC"', '添加项目聊天设置简体中文繁體中文龘麤齉');
+          await document.fonts.ready;
+          return fonts.length > 0 && fonts.every(font => font.status === 'loaded');
+        })()`);
+        assert.equal(loaded, true, 'Linux CJK font did not load from the bundled renderer assets');
+        const offlineFont = fontRequests.some(url => url.startsWith('file:') && url.includes('noto-sans-sc-full-wght') && url.endsWith('.woff2'));
+        assert.equal(offlineFont, true, 'Linux CJK font was not loaded offline from the packaged file URL');
+        await script(`document.querySelector('button[aria-label="原版 TUI"]').click()`);
+        await until(`!!document.querySelector('.terminal-panel .xterm')`, 'Linux terminal did not mount');
+        await script('document.fonts.ready.then(() => true)');
+        const terminalFont = await script(`getComputedStyle(document.querySelector('.terminal-panel .xterm-rows')).fontFamily`);
+        assert.ok(terminalFont.includes('GrokDesk Noto Sans SC'), 'Linux TUI did not include the bundled CJK fallback');
+        assert.ok(terminalFont.indexOf('DejaVu Sans Mono') < terminalFont.indexOf('GrokDesk Noto Sans SC'), 'Linux TUI must prefer monospace Latin');
+        assert.equal(await script(`!!document.querySelector('.notice-toast')`), false, 'Linux terminal font load or redraw failed');
+      }
       assert.equal(await script(`document.querySelector('[data-desktop-window-frame]').dataset.platform`), platform);
       assert.equal(await script(`document.querySelectorAll('.window-control').length`), platform === 'win32' ? 3 : 0);
       const titlebarHeight = await script(`document.querySelector('.mac-titlebar')?.getBoundingClientRect().height || 0`);

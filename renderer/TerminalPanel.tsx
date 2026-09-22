@@ -6,7 +6,7 @@ import type { AppEvent, Conversation } from '../shared/api';
 import { Button } from './components/ui/button';
 import { useText } from './i18n';
 import { errorMessage } from './useDesk';
-import { terminalClipboardAction, terminalCopyShortcut, terminalFontFamily, terminalPasteShortcut } from './platform';
+import { platform, terminalClipboardAction, terminalCopyShortcut, terminalFontFamily, terminalPasteShortcut } from './platform';
 
 function terminalTheme(dark: boolean) {
   const css = getComputedStyle(document.documentElement);
@@ -39,6 +39,15 @@ export function TerminalPanel({ conversation, dark, height = 260, copyOnSelect =
     term.loadAddon(fit);
     term.open(host.current);
     terminal.current = term;
+    // Terminal rendering must not cache missing glyphs before the webfont loads.
+    // Load the complete offline CJK family when opening a Linux terminal, then
+    // discard any cached fallback glyphs. Latin keeps its preferred monospace face.
+    if (platform === 'linux') {
+      const fonts = [...document.fonts].filter(font => font.family.replaceAll(/["']/g, '') === 'GrokDesk Noto Sans SC');
+      void Promise.all(fonts.map(font => font.load())).then(() => {
+        if (!disposed) { term.clearTextureAtlas(); term.refresh(0, term.rows - 1); }
+      }).catch(reason => { if (!disposed) notify(errorMessage(reason)); });
+    }
     // Grok's own mouse selection can copy via OSC 52 instead of xterm's
     // selection event (https://docs.x.ai/build/cli/terminal-support). Accept
     // writes after a real terminal gesture, never clipboard queries or replay.

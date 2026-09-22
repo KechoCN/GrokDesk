@@ -15,7 +15,7 @@ files:
   - '!**/*.{test,spec}.{js,mjs,cjs,ts,tsx}'
   - '!**/{test,tests,__tests__,test-d,benchmark,benchmarks}/**'
 asar: true
-# The native module, workers and spawn-helper must coexist as actual files.
+# Native modules, Windows workers and the macOS spawn-helper need actual files.
 asarUnpack:
   - node_modules/node-pty/**
 # Windows/macOS ship Node-API prebuilds. scripts/package.mjs enables Linux rebuilds.

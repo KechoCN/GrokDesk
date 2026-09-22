@@ -145,8 +145,8 @@ try {
   }
   if (archiveFiles.has('electron/browser-extension/config.js')) throw new Error('A per-install browser connection key must never be packaged.');
   if (options.platform === 'linux') {
+    // node-pty builds spawn-helper only on macOS; Linux starts PTYs with forkpty.
     requireFile(path.join(nativeModule, 'build/Release/pty.node'));
-    requireFile(path.join(nativeModule, 'build/Release/spawn-helper'));
   } else {
     const nodePlatform = options.platform === 'win' ? 'win32' : 'darwin';
     const prebuild = path.join(nativeModule, 'prebuilds', `${nodePlatform}-${options.arch}`);

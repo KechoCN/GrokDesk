@@ -1,0 +1,9 @@
+/* Full Noto Sans SC variable font, OFL-1.1. No glyphs removed.
+   Source, compression details and checksums: third-party/noto-sans-sc/NOTICE.md. */
+@font-face {
+  font-family: 'GrokDesk Noto Sans SC';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('./noto-sans-sc-full-wght.woff2') format('woff2');
+}

@@ -8,11 +8,11 @@
 
 ## 安装与运行
 
-发布构建按系统、CPU 架构命名，选择与设备匹配的文件：
+从 [GitHub Releases](https://github.com/KechoCN/GrokDesk/releases) 下载，按系统和 CPU 架构选择文件：
 
 - **Windows**：`GrokDesk-0.1.0-win-<arch>-setup.exe` 或 `-portable.exe`，支持 x64、ARM64。
 - **macOS**：`GrokDesk-0.1.0-mac-<arch>.dmg` 或 `.zip`，支持 Intel x64、Apple Silicon ARM64。将 GrokDesk 拖到 Applications。
-- **Linux**：`GrokDesk-0.1.0-linux-<arch>.AppImage` 或 `.deb`，支持 x64、ARM64。AppImage 需执行权限；Debian/Ubuntu 可安装 deb。
+- **Linux**：AppImage 使用 `linux-x86_64` / `linux-arm64`，deb 使用 `linux-amd64` / `linux-arm64`。AppImage 需执行权限；Debian/Ubuntu 可安装 deb。
 
 每组构建附带 `SHA256SUMS.txt` 和 `GrokDesk-0.1.0-<platform>-<arch>-build.json`，记录实际平台、架构和原生模块验证情况。实际生成的产物与未验证项目见 [验证记录](docs/verification-0.1.0.md)。未配置签名证书的构建不带发布者签名；macOS 默认 ad-hoc 签名，对外正式分发请配置 Developer ID 签名与公证。
 
@@ -29,7 +29,7 @@
 
 ## 开发与构建
 
-使用 Node.js 22.12+（推荐 Node.js 22 LTS）和 npm，在对应操作系统执行：
+使用 Node.js 22.12+ 和 npm（CI 使用 Node.js 24），在对应操作系统执行：
 
 ```sh
 npm ci
@@ -76,3 +76,5 @@ third-party/      第三方许可证与来源说明
 ## 许可
 
 代码采用 [Apache-2.0](LICENSE)。ZCode 组件保留原始许可与来源，见 [third-party](third-party/ZCode-SOURCE.md)。Grok 图标的权属与来源见 [Assets/NOTICE.md](Assets/NOTICE.md)；代码许可证不授予第三方商标或图标权利。
+
+随附 Noto Sans SC 字体采用 SIL Open Font License 1.1，完整许可证、来源与校验值见 [字体说明](third-party/noto-sans-sc/NOTICE.md)。
